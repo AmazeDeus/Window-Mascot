@@ -1,0 +1,22 @@
+# Configuration file for the Python script
+
+window_settings:
+  title: "VTube Studio"  # Title of the window to capture
+  size: 
+    width: 640  # Width of the transparent window
+    height: 480  # Height of the transparent window
+  position: 
+    x: 100  # X position of the window
+    y: 100  # Y position of the window
+
+update_interval: 70  # Interval for updating the image in milliseconds. Higher value means a smoother experience
+
+chroma_key_settings: # Current values are set-up and confirmed to work with, and apply chroma key to the color: #00FF00
+  hsv_lower:
+    h: 50  # Lower hue value
+    s: 100  # Lower saturation value
+    v: 100  # Lower value (brightness)
+  hsv_upper:
+    h: 70  # Upper hue value
+    s: 255  # Upper saturation value
+    v: 255  # Upper value (brightness)
