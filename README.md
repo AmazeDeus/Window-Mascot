@@ -6,6 +6,15 @@ This project creates a transparent, frameless window overlay that can continousl
 
 Note: This also works for windows that might be covered by other windows, but due to how the WIN32 API is currently capturing the window, it will still throw an error if the target window is minimized.
 
+## Example
+- Raw Target Window:
+  
+![Alt text](https://i.gyazo.com/50e5a75873a066b5bc06c8d369d06f65.png)
+
+- Captured result:
+  
+![Alt text](https://i.gyazo.com/2a40f07bf2739399043640ffecd5e777.png)
+
 ## Installation
 
 ### Prerequisites
