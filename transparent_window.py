@@ -5,6 +5,12 @@ from utils import capture_and_process_target_window
 
 class TransparentWindow(QWidget):
     def __init__(self, config):
+		"""
+        Initialize the TransparentWindow class.
+
+        This class creates a transparent, frameless window that stays on top of other windows.
+        It periodically updates its display with an image captured and processed from another window.
+        """
         super().__init__()
 
         # Store the configuration
@@ -12,21 +18,29 @@ class TransparentWindow(QWidget):
 
         self.initUI()
         self.timer = QTimer(self)
+		# Connect the timer to the updateImage method to refresh the window
         self.timer.timeout.connect(self.updateImage)
-        self.timer.start(self.config['update_interval'])
+		# Set the timer interval for updating the window's image
+        self.timer.start(self.config['update_interval']) # Update every $update_interval ms
 
     def initUI(self):
-        self.label = QLabel(self)
-        self.setAttribute(Qt.WA_TranslucentBackground)
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+		"""
+        Initialize the user interface of the transparent window.
+
+        This method sets up the window's appearance and geometry.
+        """
+        self.label = QLabel(self) # QLabel to display the captured image
+        self.setAttribute(Qt.WA_TranslucentBackground) # Set the background as translucent
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint) # Frameless and always on top
 
         window_settings = self.config['window_settings']
+		# Set geometry of the window with the given position and size
         self.setGeometry(window_settings['position']['x'], 
                          window_settings['position']['y'], 
                          window_settings['size']['width'], 
                          window_settings['size']['height'])
-        self.show()
-        self.label.setGeometry(0, 0, self.width(), self.height())
+        self.show() # Show the window
+        self.label.setGeometry(0, 0, self.width(), self.height()) # Set the geometry of the label
 
     def updateImage(self):
         """
