@@ -1,5 +1,3 @@
-### WORKS BEST WITH TEST5!!!
-
 import win32gui
 import win32ui
 from ctypes import windll
