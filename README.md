@@ -20,6 +20,7 @@ Note:
 ## Installation
 
 ### Prerequisites
+- Windows System (macOS or Linux currently not supported)
 - Python 3.10.9 (Recommended)
 - Virtual Environment (Recommended)
 - numpy
