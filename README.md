@@ -4,7 +4,9 @@
 ## Description
 This project creates a transparent, always on top, frameless window overlay that can continously capture and display content from a specified, target window. It's particularly useful for applications like VTube Studio, where users might want to overlay certain window contents onto another screen, while keeping certain parts transparent by configuring the chroma_key_settings inside config.yaml (such as a bright green background). The application uses PyQt5 for the windowing system, OpenCV for image processing, and the Win32 API for window capture.
 
-Note: This also works for target windows that might be covered by other windows, but due to how the WIN32 API is currently capturing the window, it will still throw an error if the target window is minimized.
+Note:
+- This code relies heavily on the Win32 API for window capture functionality, which is specific to Windows operating systems. As a result, this code will not be directly usable on other operating systems like macOS or Linux in its current form.
+- This code works for target windows that might also be covered by other windows, but due to how the WIN32 API is currently capturing the window, it will still throw an error if the target window is minimized.
 
 ## Example
 - Raw Target Window:
