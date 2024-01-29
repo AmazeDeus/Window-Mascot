@@ -2,9 +2,9 @@
 # Window Mascot
 
 ## Description
-This project creates a transparent, always on top, frameless window overlay that can continously capture and display content from a specified window. It's particularly useful for applications like VTube Studio, where users might want to overlay certain window contents onto another screen, while keeping certain parts transparent by configuring the chroma_key_settings inside config.yaml (such as a bright green background). The application uses PyQt5 for the windowing system, OpenCV for image processing, and the Win32 API for window capture.
+This project creates a transparent, always on top, frameless window overlay that can continously capture and display content from a specified, target window. It's particularly useful for applications like VTube Studio, where users might want to overlay certain window contents onto another screen, while keeping certain parts transparent by configuring the chroma_key_settings inside config.yaml (such as a bright green background). The application uses PyQt5 for the windowing system, OpenCV for image processing, and the Win32 API for window capture.
 
-Note: This also works for windows that might be covered by other windows, but due to how the WIN32 API is currently capturing the window, it will still throw an error if the target window is minimized.
+Note: This also works for target windows that might be covered by other windows, but due to how the WIN32 API is currently capturing the window, it will still throw an error if the target window is minimized.
 
 ## Example
 - Raw Target Window:
