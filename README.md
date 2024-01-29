@@ -40,7 +40,7 @@ Note:
 3. Create and activate a virtual environment (optional but recommended):
    ```
    python -m venv venv
-   .\venv\Scripts\activate # On Windows
+   .\venv\Scripts\activate
    ```
 4. Install required packages:
    ```
