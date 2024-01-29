@@ -5,7 +5,7 @@ from utils import capture_and_process_target_window
 
 class TransparentWindow(QWidget):
     def __init__(self, config):
-		"""
+        """
         Initialize the TransparentWindow class.
 
         This class creates a transparent, frameless window that stays on top of other windows.
@@ -24,14 +24,14 @@ class TransparentWindow(QWidget):
         self.timer.start(self.config['update_interval']) # Update every $update_interval ms
 
     def initUI(self):
-		"""
+        """
         Initialize the user interface of the transparent window.
 
         This method sets up the window's appearance and geometry.
         """
-        self.label = QLabel(self) # QLabel to display the captured image
-        self.setAttribute(Qt.WA_TranslucentBackground) # Set the background as translucent
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint) # Frameless and always on top
+        self.label = QLabel(self)  # QLabel to display the captured image
+        self.setAttribute(Qt.WA_TranslucentBackground)  # Set the background as translucent
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)  # Frameless and always on top
 
         window_settings = self.config['window_settings']
 		# Set geometry of the window with the given position and size
