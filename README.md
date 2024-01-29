@@ -41,7 +41,6 @@ Note:
    ```
    python -m venv venv
    .\venv\Scripts\activate # On Windows
-   source venv/bin/activate # On Unix or MacOS
    ```
 4. Install required packages:
    ```
