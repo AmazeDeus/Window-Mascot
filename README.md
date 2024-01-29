@@ -29,11 +29,11 @@ Note: This also works for target windows that might be covered by other windows,
 ### Steps
 1. Clone the repository:
    ```
-   git clone https://github.com/AmazeDeus/window-mascot.git
+   git clone https://github.com/AmazeDeus/Window-Mascot.git
    ```
 2. Navigate to the project directory:
    ```
-   cd window-mascot
+   cd Window-Mascot
    ```
 3. Create and activate a virtual environment (optional but recommended):
    ```
