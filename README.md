@@ -1,5 +1,5 @@
 
-# Transparent Window Overlay
+# Window Mascot
 
 ## Description
 This project creates a transparent, frameless window overlay that can continously capture and display content from a specified window. It's particularly useful for applications like VTube Studio, where users might want to overlay certain window contents onto another screen, while keeping certain parts transparent by configuring the chroma_key_settings inside config.yaml (such as a bright green background). The application uses PyQt5 for the windowing system, OpenCV for image processing, and the Win32 API for window capture.
@@ -9,11 +9,11 @@ Note: This also works for windows that might be covered by other windows, but du
 ## Example
 - Raw Target Window:
   
-![Alt text](https://i.gyazo.com/50e5a75873a066b5bc06c8d369d06f65.png)
+![Raw Target Window](https://i.gyazo.com/50e5a75873a066b5bc06c8d369d06f65.png)
 
 - Captured result:
   
-![Alt text](https://i.gyazo.com/2a40f07bf2739399043640ffecd5e777.png)
+![Captured Window Result](https://i.gyazo.com/2a40f07bf2739399043640ffecd5e777.png)
 
 ## Installation
 
@@ -29,11 +29,11 @@ Note: This also works for windows that might be covered by other windows, but du
 ### Steps
 1. Clone the repository:
    ```
-   git clone https://github.com/AmazeDeus/transparent-window-overlay.git
+   git clone https://github.com/AmazeDeus/window-mascot.git
    ```
 2. Navigate to the project directory:
    ```
-   cd transparent-window-overlay
+   cd window-mascot
    ```
 3. Create and activate a virtual environment (optional but recommended):
    ```
