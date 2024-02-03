@@ -147,21 +147,3 @@ def is_valid_position(self, x, y, selected_screen_name=None):
         return adjusted_x, adjusted_y
     
     return x, y  # Return original coordinates if the screen is not found
-
-def adjustPositionToNewScreen(self):
-    """Adjusts the window's initial position based on the selected screen in the config."""
-    # Fetch the identifier of the selected screen from the configuration
-    selected_screen_name = self.config.get('selected_screen', self.app.primaryScreen().name())
-        
-    # Find the target screen based on the selected identifier, default to primary if not found
-    target_screen = next((screen for screen in self.app.screens() if screen.name() == selected_screen_name), self.app.primaryScreen())
-        
-    # Directly use the position from the configuration as relative to the target screen
-    window_settings = self.config['window_settings']
-
-    # Calculate new position by adding the screen's top-left corner position
-    new_x = target_screen.geometry().x() + window_settings['position']['x']
-    new_y = target_screen.geometry().y() + window_settings['position']['y']
-
-    # Apply the calculated position
-    self.move(int(new_x), int(new_y))

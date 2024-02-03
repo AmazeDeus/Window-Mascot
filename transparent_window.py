@@ -45,7 +45,7 @@ class TransparentWindow(QWidget):
 
         self.show()
         self.label.setGeometry(0, 0, self.width(), self.height())
-        
+
         # Immediately adjust position according to selected screen
         self.adjustPositionToNewScreen()
 
@@ -89,45 +89,22 @@ class TransparentWindow(QWidget):
         """
         self.config = new_config
 
-        # Update the window geometry
+        # Update the window geometry based on new configuration
         window_settings = self.config['window_settings']
         self.resize(window_settings['size']['width'], window_settings['size']['height'])
-        self.move(window_settings['position']['x'], window_settings['position']['y'])
+
+        # Recalculate and apply the new position relative to the possibly updated selected screen
         self.adjustPositionToNewScreen()
 
+        # Restart the timer with the new update interval
         self.timer.stop()
         self.timer.start(self.config['update_interval'])
 
-    def get_relative_position(self, current_screen):
-        """
-        Calculates the relative position of the window within the current screen.
+        # Update QLabel geometry to match the new window size
+        self.label.setGeometry(0, 0, window_settings['size']['width'], window_settings['size']['height'])
 
-        Parameters:
-            current_screen: The screen object representing the current screen.
-
-        Returns:
-            Tuple[float, float]: The relative x and y position of the widget within the screen.
-        """
-        screen_geometry = current_screen.geometry()
-        relative_x = (self.x() - screen_geometry.x()) / screen_geometry.width()
-        relative_y = (self.y() - screen_geometry.y()) / screen_geometry.height()
-        return relative_x, relative_y
-    
-    def apply_relative_position(self, relative_x, relative_y, target_screen):
-        """
-        Apply the relative position to place the window on the target screen.
-
-        Parameters:
-            relative_x (float): The relative x position.
-            relative_y (float): The relative y position.
-            target_screen (QScreen): The target screen to move the object to.
-
-        Returns:
-            None
-        """
-        new_x = target_screen.geometry().x() + (relative_x * target_screen.geometry().width())
-        new_y = target_screen.geometry().y() + (relative_y * target_screen.geometry().height())
-        self.move(int(new_x), int(new_y))
+        # Force the window and its contents to update
+        self.update()
 
     def updateImage(self):
         """
