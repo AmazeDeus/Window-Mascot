@@ -1,89 +1,228 @@
-from PyQt5.QtWidgets import QWidget, QLabel
+from PyQt5.QtWidgets import QWidget, QLabel, QMessageBox
 from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtCore import Qt, QTimer
-from utils import capture_and_process_target_window
+from utils import capture_and_process_target_window, updateConfigurationFile
+from config_editor import ConfigEditor
 
 class TransparentWindow(QWidget):
-    def __init__(self, config):
-        """
-        Initialize the TransparentWindow class.
+    """
+    A transparent overlay window that can display an image and be interacted with through mouse events and hotkeys.
 
-        This class creates a transparent, frameless window that stays on top of other windows.
-        It periodically updates its display with an image captured and processed from another window.
+    Attributes:
+        config (dict): Configuration settings for the window, including size, position, and update interval.
+    """
+    def __init__(self, app, config):
+        """
+        Initialize the class with the given app and config.
+        
+        Parameters:
+            app: The QApplication app instance
+            config (dict): The configuration settings for the window.
+        
+        Returns:
+            None
         """
         super().__init__()
-
-        # Store the configuration
         self.config = config
-
+        self.app = app
         self.initUI()
+        self.postInit(app)
         self.timer = QTimer(self)
-		# Connect the timer to the updateImage method to refresh the window
         self.timer.timeout.connect(self.updateImage)
-		# Set the timer interval for updating the window's image
-        self.timer.start(self.config['update_interval']) # Update every $update_interval ms
+        self.timer.start(self.config['update_interval'])
 
     def initUI(self):
         """
-        Initialize the user interface of the transparent window.
-
-        This method sets up the window's appearance and geometry.
+        Initializes the user interface of the transparent window based on the provided configuration.
         """
-        self.label = QLabel(self)  # QLabel to display the captured image
-        self.setAttribute(Qt.WA_TranslucentBackground)  # Set the background as translucent
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)  # Frameless and always on top
+        self.label = QLabel(self)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
 
+        # Set initial size but move position handling to adjustPositionToNewScreen
         window_settings = self.config['window_settings']
-		# Set geometry of the window with the given position and size
-        self.setGeometry(window_settings['position']['x'], 
-                         window_settings['position']['y'], 
-                         window_settings['size']['width'], 
-                         window_settings['size']['height'])
-        self.show() # Show the window
-        self.label.setGeometry(0, 0, self.width(), self.height()) # Set the geometry of the label
+        self.resize(window_settings['size']['width'], window_settings['size']['height'])
+
+        self.show()
+        self.label.setGeometry(0, 0, self.width(), self.height())
+        
+        # Immediately adjust position according to selected screen
+        self.adjustPositionToNewScreen()
+
+    def postInit(self, app):
+        """
+        Initializes the instance after it has been created. It connects the screenRemoved signal of the app to the handleScreenRemoved method of the instance.
+        """
+        app.screenRemoved.connect(self.handleScreenRemoved)
+
+    def launchConfigEditor(self):
+        """
+        Launches the configuration editor window to allow users to modify settings.
+        """
+        self.editor = ConfigEditor(self, self.app)
+        self.editor.show()
+
+    def adjustPositionToNewScreen(self):
+        """Adjusts the window's initial position based on the selected screen in the config."""
+        # Fetch the identifier of the selected screen from the configuration
+        selected_screen_name = self.config.get('selected_screen', self.app.primaryScreen().name())
+            
+        # Find the target screen based on the selected identifier, default to primary if not found
+        target_screen = next((screen for screen in self.app.screens() if screen.name() == selected_screen_name), self.app.primaryScreen())
+            
+        # Directly use the position from the configuration as relative to the target screen
+        window_settings = self.config['window_settings']
+
+        # Calculate new position by adding the screen's top-left corner position
+        new_x = target_screen.geometry().x() + window_settings['position']['x']
+        new_y = target_screen.geometry().y() + window_settings['position']['y']
+
+        # Apply the calculated position
+        self.move(int(new_x), int(new_y))
+
+    def updateConfig(self, new_config):
+        """
+        Updates the window's configuration and adjusts the window accordingly.
+
+        Args:
+            new_config (dict): The new configuration settings to apply.
+        """
+        self.config = new_config
+
+        # Update the window geometry
+        window_settings = self.config['window_settings']
+        self.resize(window_settings['size']['width'], window_settings['size']['height'])
+        self.move(window_settings['position']['x'], window_settings['position']['y'])
+        self.adjustPositionToNewScreen()
+
+        self.timer.stop()
+        self.timer.start(self.config['update_interval'])
+
+    def get_relative_position(self, current_screen):
+        """
+        Calculates the relative position of the window within the current screen.
+
+        Parameters:
+            current_screen: The screen object representing the current screen.
+
+        Returns:
+            Tuple[float, float]: The relative x and y position of the widget within the screen.
+        """
+        screen_geometry = current_screen.geometry()
+        relative_x = (self.x() - screen_geometry.x()) / screen_geometry.width()
+        relative_y = (self.y() - screen_geometry.y()) / screen_geometry.height()
+        return relative_x, relative_y
+    
+    def apply_relative_position(self, relative_x, relative_y, target_screen):
+        """
+        Apply the relative position to place the window on the target screen.
+
+        Parameters:
+            relative_x (float): The relative x position.
+            relative_y (float): The relative y position.
+            target_screen (QScreen): The target screen to move the object to.
+
+        Returns:
+            None
+        """
+        new_x = target_screen.geometry().x() + (relative_x * target_screen.geometry().width())
+        new_y = target_screen.geometry().y() + (relative_y * target_screen.geometry().height())
+        self.move(int(new_x), int(new_y))
 
     def updateImage(self):
         """
-        Update the image displayed in the window.
-
-        This method captures and processes an image from the target window and updates the QLabel with it.
+        Captures and processes an image according to the current configuration, then updates the window's display.
         """
-        image = capture_and_process_target_window(self.config)  # Capture and process the image
+        image = capture_and_process_target_window(self.config)
 
         if image is not None:
-            # If an image is captured, convert it to QPixmap and display it in the label
             height, width, channel = image.shape
-            bytesPerLine = 4 * width  # Calculate the number of bytes per line
+            bytesPerLine = 4 * width
             qImg = QImage(image.data, width, height, bytesPerLine, QImage.Format_RGBA8888)
             pixmap = QPixmap.fromImage(qImg)
             self.label.setPixmap(pixmap)
-            self.resize(pixmap.size())  # Resize the window to fit the image
+            self.resize(pixmap.size())
+
+    def handleScreenRemoved(self, removed_screen):
+        """
+        Handle the removal of a screen.
+
+        Args:
+            removed_screen: The screen that has been removed.
+
+        Returns:
+            None
+        """
+        self.editor = ConfigEditor(self)
+
+        if self.config.get('selected_screen', '') == removed_screen.name():
+            QMessageBox.warning(self, "Screen Removed", "The selected screen has been removed. Adjusting position.")
+            primary_screen = self.app.primaryScreen()
+            self.config['selected_screen'] = primary_screen.name()
+            
+            # Save the updated configuration
+            self.editor.save_config()
+
+    def keyPressEvent(self, event):
+        """
+        Handles hotkey presses for launching the configuration editor.
+
+        Args:
+            event (QKeyEvent): The key press event.
+        """
+        if event.key() == Qt.Key_Q and (event.modifiers() & Qt.ControlModifier):
+            self.launchConfigEditor()
+        else:
+            super().keyPressEvent(event)
 
     def mousePressEvent(self, event):
         """
-        Handle mouse press events.
+        Initiates window drag on mouse press.
 
-        Enables dragging of the window when pressing the left mouse button.
+        Args:
+            event (QMouseEvent): The mouse press event.
         """
         if event.button() == Qt.LeftButton:
-            self.moving = True  # Flag to indicate the window is being moved
-            self.offset = event.pos()  # Store the position where the mouse was pressed
+            self.moving = True
+            self.offset = event.pos()
 
     def mouseMoveEvent(self, event):
         """
-        Handle mouse move events.
+        Handles window dragging.
 
-        Allows the window to be dragged around.
+        Args:
+            event (QMouseEvent): The mouse move event.
         """
         if self.moving:
-            # Move the window's position based on mouse movement
             self.move(self.pos() + event.pos() - self.offset)
 
     def mouseReleaseEvent(self, event):
         """
-        Handle mouse release events.
+        Stops window dragging on mouse release and updates the configuration
+        with the new window position relative to the selected screen.
 
-        Stops dragging the window when the left mouse button is released.
+        Args:
+            event (QMouseEvent): The mouse release event.
         """
-        if event.button() == Qt.LeftButton:
-            self.moving = False  # Stop moving the window
+        super().mouseReleaseEvent(event)
+        if event.button() == Qt.LeftButton and self.moving:
+            self.moving = False  # Assuming you have a self.moving attribute set in mousePressEvent and mouseMoveEvent
+
+            # Determine the center of the window for identifying the current screen
+            window_center = self.geometry().center()
+            current_screen = self.app.screenAt(window_center)
+
+            # Find the index or identifier of the current screen
+            current_screen_name = current_screen.name()
+            self.config['selected_screen'] = current_screen_name  # Update the selected_screen configuration
+
+            # Calculate the new position relative to the current screen's top-left corner
+            new_x_relative = self.x() - current_screen.geometry().x()
+            new_y_relative = self.y() - current_screen.geometry().y()
+
+            # Update the position in the configuration
+            self.config['window_settings']['position']['x'] = new_x_relative
+            self.config['window_settings']['position']['y'] = new_y_relative
+
+            # Save the updated configuration
+            updateConfigurationFile(self)
