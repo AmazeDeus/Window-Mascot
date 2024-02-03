@@ -37,9 +37,10 @@ class TransparentWindow(QWidget):
         """
         self.label = QLabel(self)
         self.setAttribute(Qt.WA_TranslucentBackground)
+        self.label.setStyleSheet('background-color: transparent;')
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
 
-        # Set initial size but move position handling to adjustPositionToNewScreen
+        # Set initial size
         window_settings = self.config['window_settings']
         self.resize(window_settings['size']['width'], window_settings['size']['height'])
 
@@ -111,14 +112,56 @@ class TransparentWindow(QWidget):
         Captures and processes an image according to the current configuration, then updates the window's display.
         """
         image = capture_and_process_target_window(self.config)
-
         if image is not None:
             height, width, channel = image.shape
             bytesPerLine = 4 * width
             qImg = QImage(image.data, width, height, bytesPerLine, QImage.Format_RGBA8888)
             pixmap = QPixmap.fromImage(qImg)
-            self.label.setPixmap(pixmap)
-            self.resize(pixmap.size())
+            
+            # Scale the pixmap to maintain aspect ratio
+            self.scalePixmapToLabel(pixmap)
+
+            self.label.setAlignment(Qt.AlignCenter) # Center the label within the window
+
+    def resizeEvent(self, event):
+        """
+        Handle the resize event for the widget.
+
+        Args:
+            event: The resize event object.
+
+        Returns:
+            None
+        """
+        super().resizeEvent(event)  # Call the superclass method
+        if self.label.pixmap() is not None:
+            self.scalePixmapToLabel(self.label.pixmap())  # Scale current pixmap to new window size
+
+    def scalePixmapToLabel(self, pixmap):
+        """
+        Scale the given pixmap to fit the dimensions of the QLabel, while maintaining the aspect ratio. 
+
+        Args:
+            pixmap: The pixmap to be scaled
+
+        Returns:
+            None
+        """
+        if pixmap:
+            # Calculate the aspect ratio of the pixmap
+            aspect_ratio = pixmap.width() / pixmap.height()
+            new_width = self.width()
+            new_height = int(new_width / aspect_ratio)
+            if new_height > self.height():
+                new_height = self.height()
+                new_width = int(new_height * aspect_ratio)
+            
+            # Scale the pixmap to fill the new dimensions. Might crop parts of the image but will avoid black bars while keeping the aspect ratio.
+            scaled_pixmap = pixmap.scaled(self.size(), Qt.KeepAspectRatioByExpanding, Qt.SmoothTransformation)
+            
+            # Update the QLabel with the resized pixmap
+            self.label.setPixmap(scaled_pixmap)
+            self.label.resize(new_width, new_height)  # Adjust QLabel size to fit the scaled pixmap
 
     def handleScreenRemoved(self, removed_screen):
         """
