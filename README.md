@@ -55,6 +55,9 @@ Note:
    ```
    python run.py
    ```
+3. To open the configuration GUI at any time during the application's runtime
+   - Focus the window and press `Ctrl + Q`.
+   - This allows for easy access to the configuration settings without needing to manually edit the `config.yaml` file.
 
 ## Configuration
 Edit `config.yaml` to change the window settings and chroma key values. The available configurations are:
