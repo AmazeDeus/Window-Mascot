@@ -64,6 +64,7 @@ Edit `config.yaml` to change the window settings and chroma key values. The avai
 - `window_settings`: Configure the title, size, and position of the window to capture.
 - `update_interval`: Set the refresh rate of the window capture.
 - `chroma_key_settings`: Adjust the HSV values for the chroma key effect.
+- `selected_screen`: Choose your target display for the capture window. This will default to your primary display.
 
 ## Contributing
 Contributions to this project are welcome! Feel free to fork the repository and submit pull requests.
