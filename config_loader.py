@@ -2,7 +2,7 @@ import yaml
 
 import yaml
 
-def load_config(config_file):
+def load_config(config_file, app):
     """
     Loads the application configuration from a YAML file, validates its contents,
     and sets default values for missing configuration settings.
@@ -14,6 +14,7 @@ def load_config(config_file):
 
     Args:
         config_file (str): The path to the YAML configuration file.
+        app (QApplication): The main application.
 
     Returns:
         dict: The loaded and validated configuration with default values for missing settings.
@@ -35,6 +36,9 @@ def load_config(config_file):
     chroma_key_settings = config.get('chroma_key_settings', {})
     chroma_key_settings['hsv_lower'] = chroma_key_settings.get('hsv_lower', {'h': 50, 's': 100, 'v': 100})
     chroma_key_settings['hsv_upper'] = chroma_key_settings.get('hsv_upper', {'h': 70, 's': 255, 'v': 255})
+
+    # Validate and set defaults for selected_screen
+    config['selected_screen'] = config.get('selected_screen', app.primaryScreen().name())
 
     # Reassign validated and defaulted settings back to config
     config['window_settings'] = window_settings

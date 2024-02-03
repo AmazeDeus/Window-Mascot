@@ -6,12 +6,12 @@ from config_loader import load_config
 
 def main():
     app = QApplication(sys.argv)
-    config = load_config('config.yaml')
+    config = load_config('config.yaml', app)
     transp_window = TransparentWindow(app, config)
 
     def config_changed(path):
         print(f"Configuration changed: {path}")
-        new_config = load_config('config.yaml')
+        new_config = load_config('config.yaml', app)
         transp_window.updateConfig(new_config)
     
     # Setup filesystem watcher
